@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Claude AI Assistant</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <!-- Particules de fond -->
+        <div class="particles" id="particles"></div>
+
+        <!-- Avatar principal -->
+        <div class="avatar-section">
+            <div class="hologram-ring ring-1"></div>
+            <div class="hologram-ring ring-2"></div>
+            <div class="hologram-ring ring-3"></div>
+
+            <div class="avatar" id="avatar">
+                <div class="head">
+                    <div class="face">
+                        <div class="eye left-eye">
+                            <div class="pupil"></div>
+                            <div class="eye-glow"></div>
+                        </div>
+                        <div class="eye right-eye">
+                            <div class="pupil"></div>
+                            <div class="eye-glow"></div>
+                        </div>
+                        <div class="mouth" id="mouth">
+                            <div class="mouth-inner"></div>
+                        </div>
+                    </div>
+                    <div class="head-side left-side"></div>
+                    <div class="head-side right-side"></div>
+                    <div class="forehead-light"></div>
+                </div>
+                <div class="neck">
+                    <div class="neck-light"></div>
+                </div>
+                <div class="body">
+                    <div class="chest">
+                        <div class="core-light" id="coreLight"></div>
+                        <div class="chest-lines"></div>
+                    </div>
+                    <div class="shoulder left-shoulder"></div>
+                    <div class="shoulder right-shoulder"></div>
+                </div>
+            </div>
+
+            <!-- Status indicator -->
+            <div class="status" id="status">
+                <div class="status-dot"></div>
+                <span>Prêt</span>
+            </div>
+        </div>
+
+        <!-- Zone de conversation -->
+        <div class="chat-section">
+            <div class="chat-messages" id="chatMessages">
+                <div class="message bot-message">
+                    <p>Salut ! Je suis ton assistant Claude. Appuie sur le micro et parle-moi, je t'écoute.</p>
+                </div>
+            </div>
+
+            <!-- Visualiseur audio -->
+            <div class="audio-visualizer" id="audioVisualizer">
+                <div class="viz-bar"></div>
+                <div class="viz-bar"></div>
+                <div class="viz-bar"></div>
+                <div class="viz-bar"></div>
+                <div class="viz-bar"></div>
+                <div class="viz-bar"></div>
+                <div class="viz-bar"></div>
+                <div class="viz-bar"></div>
+                <div class="viz-bar"></div>
+            </div>
+
+            <!-- Contrôles -->
+            <div class="controls">
+                <button class="mic-btn" id="micBtn" onclick="toggleListening()">
+                    <svg viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3z"/>
+                        <path d="M17 11c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z"/>
+                    </svg>
+                    <div class="mic-pulse"></div>
+                </button>
+                <div class="mic-label" id="micLabel">Appuie pour parler</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal clé API -->
+    <div class="modal" id="apiModal">
+        <div class="modal-content">
+            <h2>Configuration</h2>
+            <p>Entre ta clé API Anthropic pour commencer :</p>
+            <input type="password" id="apiKeyInput" placeholder="sk-ant-..." />
+            <button onclick="saveApiKey()">Démarrer</button>
+            <p class="modal-hint">Ta clé est stockée localement uniquement.</p>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
