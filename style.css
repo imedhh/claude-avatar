@@ -551,12 +551,11 @@ body {
     height: 20px;
 }
 
-.or-divider {
-    color: rgba(100, 180, 255, 0.3);
+.mic-hint {
+    color: rgba(100, 180, 255, 0.4);
     font-size: 12px;
-    text-transform: uppercase;
-    letter-spacing: 2px;
-    font-family: 'Orbitron', monospace;
+    text-align: center;
+    font-style: italic;
 }
 
 .mic-btn {

@@ -60,9 +60,10 @@ function init() {
         }
     }
 
-    if (!speechSupported) {
-        micBtn.style.display = 'none';
-        micLabel.textContent = '';
+    // Hide mic button on iOS (not supported)
+    const micBtnEl = document.getElementById('micBtn');
+    if (!speechSupported && micBtnEl) {
+        micBtnEl.style.display = 'none';
     }
 
     // Preload voices
