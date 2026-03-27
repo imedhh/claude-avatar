@@ -11,7 +11,6 @@ const micBtn = document.getElementById('micBtn');
 const micLabel = document.getElementById('micLabel');
 const audioVisualizer = document.getElementById('audioVisualizer');
 const apiModal = document.getElementById('apiModal');
-const apiKeyInput = document.getElementById('apiKeyInput');
 
 // ===== STATE =====
 let isListening = false;
@@ -19,68 +18,67 @@ let recognition = null;
 let synthesis = window.speechSynthesis;
 let conversationHistory = [];
 let currentUtterance = null;
+let speechSupported = false;
 
 // ===== INIT =====
 function init() {
     createParticles();
-
     apiModal.classList.add('hidden');
 
     // Setup Speech Recognition
-    if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
-        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-        recognition = new SpeechRecognition();
-        recognition.lang = 'fr-FR';
-        recognition.interimResults = true;
-        recognition.continuous = false;
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (SpeechRecognition) {
+        try {
+            recognition = new SpeechRecognition();
+            recognition.lang = 'fr-FR';
+            recognition.interimResults = false;
+            recognition.continuous = false;
+            recognition.maxAlternatives = 1;
 
-        recognition.onresult = (event) => {
-            let finalTranscript = '';
-            let interimTranscript = '';
-
-            for (let i = event.resultIndex; i < event.results.length; i++) {
-                if (event.results[i].isFinal) {
-                    finalTranscript += event.results[i][0].transcript;
-                } else {
-                    interimTranscript += event.results[i][0].transcript;
+            recognition.onresult = (event) => {
+                const transcript = event.results[0][0].transcript;
+                if (transcript) {
+                    handleUserMessage(transcript);
                 }
-            }
+            };
 
-            if (finalTranscript) {
-                handleUserMessage(finalTranscript);
-            }
-        };
-
-        recognition.onend = () => {
-            if (isListening) {
+            recognition.onend = () => {
                 stopListening();
-            }
-        };
+            };
 
-        recognition.onerror = (event) => {
-            console.error('Speech recognition error:', event.error);
-            if (event.error !== 'no-speech') {
+            recognition.onerror = (event) => {
+                console.error('Speech error:', event.error);
                 stopListening();
-            }
-        };
-    } else {
-        micLabel.textContent = 'Micro non supporté';
-        micBtn.disabled = true;
+                if (event.error === 'not-allowed') {
+                    addMessage('Autorise le micro dans les paramètres de ton navigateur.', false);
+                }
+            };
+
+            speechSupported = true;
+        } catch (e) {
+            speechSupported = false;
+        }
+    }
+
+    if (!speechSupported) {
+        micBtn.style.display = 'none';
+        micLabel.textContent = '';
     }
 
     // Preload voices
-    synthesis.getVoices();
-    synthesis.onvoiceschanged = () => synthesis.getVoices();
+    loadVoices();
+    if (synthesis.onvoiceschanged !== undefined) {
+        synthesis.onvoiceschanged = loadVoices;
+    }
 }
 
-// ===== API KEY =====
-function saveApiKey() {
-    const key = apiKeyInput.value.trim();
-    if (key) {
-        API_KEY = key;
-        localStorage.setItem('claude_api_key', key);
-        apiModal.classList.add('hidden');
-    }
+let frenchVoice = null;
+function loadVoices() {
+    const voices = synthesis.getVoices();
+    frenchVoice = voices.find(v => v.lang === 'fr-FR' && v.name.includes('Thomas'))
+        || voices.find(v => v.lang === 'fr-FR' && v.name.includes('Daniel'))
+        || voices.find(v => v.lang === 'fr-FR')
+        || voices.find(v => v.lang.startsWith('fr'));
 }
 
 // ===== PARTICLES =====
@@ -100,6 +98,7 @@ function createParticles() {
 
 // ===== LISTENING =====
 function toggleListening() {
+    // Stop speaking if currently speaking
     if (currentUtterance) {
         synthesis.cancel();
         currentUtterance = null;
@@ -121,14 +120,12 @@ function startListening() {
     micLabel.textContent = 'Je t\'écoute...';
     audioVisualizer.classList.add('active');
     setAvatarState('listening');
-
-    // Animate visualizer
     startVisualizerAnimation();
 
     try {
         recognition.start();
     } catch (e) {
-        // Already started
+        console.error('Recognition start error:', e);
     }
 }
 
@@ -137,12 +134,20 @@ function stopListening() {
     micBtn.classList.remove('active');
     micLabel.textContent = 'Appuie pour parler';
     audioVisualizer.classList.remove('active');
-
     stopVisualizerAnimation();
 
     try {
         recognition.stop();
     } catch (e) {}
+}
+
+// ===== TEXT INPUT =====
+function sendTextMessage() {
+    const input = document.getElementById('textInput');
+    const text = input.value.trim();
+    if (!text) return;
+    input.value = '';
+    handleUserMessage(text);
 }
 
 // ===== VISUALIZER =====
@@ -152,8 +157,7 @@ function startVisualizerAnimation() {
     const bars = audioVisualizer.querySelectorAll('.viz-bar');
     vizInterval = setInterval(() => {
         bars.forEach(bar => {
-            const height = Math.random() * 30 + 6;
-            bar.style.height = height + 'px';
+            bar.style.height = (Math.random() * 30 + 6) + 'px';
         });
     }, 100);
 }
@@ -220,7 +224,7 @@ async function handleUserMessage(text) {
         console.error('API Error:', error);
         const errMsg = 'Désolé, j\'ai eu un problème de connexion. Réessaie.';
         addMessage(errMsg, false);
-        speak(errMsg);
+        setAvatarState('idle');
     }
 }
 
@@ -249,21 +253,13 @@ function speak(text) {
 
     const utterance = new SpeechSynthesisUtterance(text);
     utterance.lang = 'fr-FR';
-    utterance.rate = 1.05;
-    utterance.pitch = 0.95;
-
-    // Try to find a good French voice
-    const voices = synthesis.getVoices();
-    const frenchVoice = voices.find(v => v.lang.startsWith('fr') && v.name.includes('Thomas'))
-        || voices.find(v => v.lang.startsWith('fr') && v.name.includes('Daniel'))
-        || voices.find(v => v.lang.startsWith('fr') && !v.name.includes('Google'))
-        || voices.find(v => v.lang.startsWith('fr'));
+    utterance.rate = 1.0;
+    utterance.pitch = 1.0;
 
     if (frenchVoice) {
         utterance.voice = frenchVoice;
     }
 
-    // Animate mouth during speech
     utterance.onstart = () => {
         currentUtterance = utterance;
         audioVisualizer.classList.add('active');
@@ -277,14 +273,18 @@ function speak(text) {
         stopVisualizerAnimation();
     };
 
-    utterance.onerror = () => {
+    utterance.onerror = (e) => {
+        console.error('TTS error:', e);
         currentUtterance = null;
         setAvatarState('idle');
         audioVisualizer.classList.remove('active');
         stopVisualizerAnimation();
     };
 
-    synthesis.speak(utterance);
+    // iOS fix: need small delay
+    setTimeout(() => {
+        synthesis.speak(utterance);
+    }, 100);
 }
 
 // ===== KEYBOARD SHORTCUT =====
@@ -295,9 +295,11 @@ document.addEventListener('keydown', (e) => {
     }
 });
 
-// Allow Enter key on API input
-apiKeyInput?.addEventListener('keydown', (e) => {
-    if (e.key === 'Enter') saveApiKey();
+// Enter to send text
+document.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' && e.target.id === 'textInput') {
+        sendTextMessage();
+    }
 });
 
 // ===== START =====

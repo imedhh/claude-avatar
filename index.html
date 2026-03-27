@@ -79,6 +79,15 @@
 
             <!-- Contrôles -->
             <div class="controls">
+                <div class="text-input-row">
+                    <input type="text" id="textInput" placeholder="Tape ton message ici..." autocomplete="off" />
+                    <button class="send-btn" onclick="sendTextMessage()">
+                        <svg viewBox="0 0 24 24" fill="currentColor" width="22" height="22">
+                            <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/>
+                        </svg>
+                    </button>
+                </div>
+                <div class="or-divider">ou</div>
                 <button class="mic-btn" id="micBtn" onclick="toggleListening()">
                     <svg viewBox="0 0 24 24" fill="currentColor">
                         <path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3z"/>

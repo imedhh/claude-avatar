@@ -498,6 +498,67 @@ body {
     padding: 15px 0;
 }
 
+/* Text input */
+.text-input-row {
+    display: flex;
+    gap: 8px;
+    width: 100%;
+}
+
+.text-input-row input {
+    flex: 1;
+    padding: 12px 16px;
+    background: rgba(10, 15, 30, 0.8);
+    border: 1px solid rgba(100, 180, 255, 0.2);
+    border-radius: 25px;
+    color: #e0e0ff;
+    font-size: 15px;
+    font-family: 'Rajdhani', sans-serif;
+    outline: none;
+    transition: border-color 0.3s;
+}
+
+.text-input-row input:focus {
+    border-color: #64b4ff;
+}
+
+.text-input-row input::placeholder {
+    color: rgba(100, 180, 255, 0.3);
+}
+
+.send-btn {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #1a3a5a, #2a4a7a);
+    border: 1px solid rgba(100, 180, 255, 0.3);
+    color: #64b4ff;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s;
+    flex-shrink: 0;
+}
+
+.send-btn:hover, .send-btn:active {
+    border-color: #64b4ff;
+    box-shadow: 0 0 15px rgba(100, 180, 255, 0.3);
+}
+
+.send-btn svg {
+    width: 20px;
+    height: 20px;
+}
+
+.or-divider {
+    color: rgba(100, 180, 255, 0.3);
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    font-family: 'Orbitron', monospace;
+}
+
 .mic-btn {
     width: 70px;
     height: 70px;
