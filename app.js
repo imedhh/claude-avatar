@@ -1,7 +1,5 @@
 // ===== CONFIG =====
-let API_KEY = localStorage.getItem('claude_api_key') || 'REMOVED';
-const API_URL = 'https://api.anthropic.com/v1/messages';
-const MODEL = 'claude-sonnet-4-20250514';
+const API_URL = '/api/chat';
 
 // ===== ELEMENTS =====
 const avatar = document.getElementById('avatar');
@@ -26,11 +24,7 @@ let currentUtterance = null;
 function init() {
     createParticles();
 
-    if (!API_KEY) {
-        apiModal.classList.remove('hidden');
-    } else {
-        apiModal.classList.add('hidden');
-    }
+    apiModal.classList.add('hidden');
 
     // Setup Speech Recognition
     if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
@@ -230,25 +224,13 @@ async function handleUserMessage(text) {
     }
 }
 
-// ===== CLAUDE API =====
+// ===== CLAUDE API (via backend proxy) =====
 async function callClaude(userMessage) {
     const response = await fetch(API_URL, {
         method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'x-api-key': API_KEY,
-            'anthropic-version': '2023-06-01',
-            'anthropic-dangerous-direct-browser-access': 'true'
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-            model: MODEL,
-            max_tokens: 1024,
-            system: `Tu es un assistant IA avec un corps holographique humanoïde. Tu parles en français.
-Tu es amical, naturel et concis dans tes réponses car elles seront lues à voix haute.
-Garde tes réponses courtes (2-3 phrases max) pour que ce soit agréable à écouter.
-Tu t'appelles Claude. Tu es créé par Anthropic.
-Ne mets pas de formatage markdown, astérisques ou caractères spéciaux dans tes réponses car elles sont lues à voix haute.`,
-            messages: conversationHistory.slice(-20) // Keep last 20 messages for context
+            messages: conversationHistory.slice(-20)
         })
     });
 
